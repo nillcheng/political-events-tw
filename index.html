@@ -49,11 +49,69 @@
             padding: 30px 40px;
             background: #f8f9fa;
             border-bottom: 2px solid #e9ecef;
+        }
+
+        .controls-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-box label {
+            font-size: 13px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .filter-box select {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .filter-box select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .reset-btn {
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-self: flex-end;
+        }
+
+        .reset-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
         }
 
         .search-box {
@@ -247,17 +305,6 @@
             text-decoration: underline;
         }
 
-        .tag {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #e7f3ff;
-            color: #0066cc;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -277,8 +324,17 @@
             }
 
             .actions {
+                padding: 20px;
+            }
+
+            .controls-row {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .add-event-btn {
@@ -296,20 +352,54 @@
         </header>
 
         <div class="actions">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 搜尋事件、日期...">
+            <div class="controls-row">
+                <div class="filter-group">
+                    <div class="filter-box">
+                        <label>年份</label>
+                        <select id="yearFilter">
+                            <option value="">全部年份</option>
+                        </select>
+                    </div>
+                    <div class="filter-box">
+                        <label>月份</label>
+                        <select id="monthFilter">
+                            <option value="">全部月份</option>
+                            <option value="01">1月</option>
+                            <option value="02">2月</option>
+                            <option value="03">3月</option>
+                            <option value="04">4月</option>
+                            <option value="05">5月</option>
+                            <option value="06">6月</option>
+                            <option value="07">7月</option>
+                            <option value="08">8月</option>
+                            <option value="09">9月</option>
+                            <option value="10">10月</option>
+                            <option value="11">11月</option>
+                            <option value="12">12月</option>
+                        </select>
+                    </div>
+                    <button class="reset-btn" id="resetBtn">🔄 重置篩選</button>
+                </div>
+                <a href="https://github.com/nillcheng/political-events-tw/issues/new?template=event.md" 
+                   class="add-event-btn" 
+                   target="_blank">
+                    ➕ 新增事件
+                </a>
             </div>
-            <a href="https://github.com/nillcheng/political-events-tw/issues/new?template=event.md" 
-               class="add-event-btn" 
-               target="_blank">
-                ➕ 新增事件
-            </a>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜尋事件內容...">
+            </div>
         </div>
 
         <div class="stats">
             <div class="stat-item">
                 <span class="stat-number" id="totalEvents">0</span>
                 <span class="stat-label">筆事件</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="displayedEvents">0</span>
+                <span class="stat-label">筆符合篩選</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number" id="latestYear">2026</span>
@@ -334,13 +424,8 @@
 
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-state-icon">📋</div>
-                <h3>還沒有任何事件</h3>
-                <p>成為第一個記錄政治事件的人！</p>
-                <a href="https://github.com/nillcheng/political-events-tw/issues/new?template=event.md" 
-                   class="add-event-btn" 
-                   target="_blank">
-                    ➕ 新增第一筆事件
-                </a>
+                <h3>找不到符合條件的事件</h3>
+                <p>試試調整篩選條件或搜尋關鍵字</p>
             </div>
         </div>
 
@@ -357,11 +442,12 @@
         const API_URL = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/issues`;
 
         let allEvents = [];
+        let filteredEvents = [];
 
         // 載入事件
         async function loadEvents() {
             try {
-                const response = await fetch(`${API_URL}?state=open&labels=event`);
+                const response = await fetch(`${API_URL}?state=open&labels=event&per_page=100`);
                 const issues = await response.json();
 
                 allEvents = issues
@@ -369,7 +455,8 @@
                     .filter(event => event !== null)
                     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                displayEvents(allEvents);
+                populateYearFilter();
+                applyFilters();
                 updateStats();
             } catch (error) {
                 console.error('載入事件失敗:', error);
@@ -381,7 +468,11 @@
         function parseEvent(issue) {
             try {
                 const body = issue.body || '';
-                const dateMatch = body.match(/日期[：:]\s*(\d{4})\s*年?\s*(\d{1,2})\s*月?\s*(\d{1,2})?\s*日?/);
+                
+                // 支援多種日期格式
+                const dateMatch = body.match(/日期[：:]\s*(\d{4})\s*年?\s*(\d{1,2})\s*月?\s*(\d{1,2})?\s*日?/) ||
+                                body.match(/年份[：:]\s*(\d{4})[\s\S]*?月份[：:]\s*(\d{1,2})/);
+                
                 const eventMatch = body.match(/事件[：:]\s*(.+?)(?:\n|$)/);
                 const sourceMatch = body.match(/來源[：:]\s*(.+?)(?:\n|$)/);
 
@@ -406,6 +497,40 @@
             }
         }
 
+        // 填充年份選項
+        function populateYearFilter() {
+            const years = [...new Set(allEvents.map(e => e.year))].sort((a, b) => b - a);
+            const yearFilter = document.getElementById('yearFilter');
+            
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = `${year} 年`;
+                yearFilter.appendChild(option);
+            });
+        }
+
+        // 套用篩選
+        function applyFilters() {
+            const yearFilter = document.getElementById('yearFilter').value;
+            const monthFilter = document.getElementById('monthFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredEvents = allEvents.filter(event => {
+                const matchYear = !yearFilter || event.year === yearFilter;
+                const matchMonth = !monthFilter || event.month === monthFilter;
+                const matchSearch = !searchTerm || 
+                    event.event.toLowerCase().includes(searchTerm) ||
+                    event.year.includes(searchTerm) ||
+                    event.month.includes(searchTerm);
+                
+                return matchYear && matchMonth && matchSearch;
+            });
+
+            displayEvents(filteredEvents);
+            updateStats();
+        }
+
         // 顯示事件
         function displayEvents(events) {
             const loading = document.getElementById('loading');
@@ -425,7 +550,9 @@
             table.style.display = 'table';
 
             tbody.innerHTML = events.map(event => {
-                const dateStr = event.day ? `${event.year} 年 ${event.month} 月 ${event.day} 日` : `${event.year} 年 ${event.month} 月`;
+                const dateStr = event.day && event.day !== '01' ? 
+                    `${event.year} 年 ${event.month} 月 ${event.day} 日` : 
+                    `${event.year} 年 ${event.month} 月`;
                 
                 return `
                     <tr>
@@ -437,7 +564,7 @@
                                     `<a href="${event.source}" class="source-link" target="_blank">查看來源</a>` : 
                                     escapeHtml(event.source)
                                 ) : 
-                                `<a href="${event.issueUrl}" class="source-link" target="_blank">GitHub Issue</a>`
+                                `<a href="${event.issueUrl}" class="source-link" target="_blank">GitHub</a>`
                             }
                         </td>
                     </tr>
@@ -448,21 +575,11 @@
         // 更新統計
         function updateStats() {
             document.getElementById('totalEvents').textContent = allEvents.length;
+            document.getElementById('displayedEvents').textContent = filteredEvents.length;
             if (allEvents.length > 0) {
                 document.getElementById('latestYear').textContent = allEvents[0].year;
             }
         }
-
-        // 搜尋功能
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            const filtered = allEvents.filter(event => 
-                event.event.toLowerCase().includes(searchTerm) ||
-                event.year.includes(searchTerm) ||
-                event.month.includes(searchTerm)
-            );
-            displayEvents(filtered);
-        });
 
         // HTML 跳脫
         function escapeHtml(text) {
@@ -470,6 +587,19 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        // 重置篩選
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('yearFilter').value = '';
+            document.getElementById('monthFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        });
+
+        // 篩選事件監聽
+        document.getElementById('yearFilter').addEventListener('change', applyFilters);
+        document.getElementById('monthFilter').addEventListener('change', applyFilters);
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
 
         // 初始化
         loadEvents();
