@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>無立場台灣政治事件紀錄</title>
+    <title>台灣政治事件紀錄</title>
     <style>
         * {
             margin: 0;
@@ -13,49 +13,55 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
-            /* 背景改為深色漸層 */
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
-            color: #e0e0e0;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            /* 容器背景改為深灰色 */
             background: #1a1a1a;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
             overflow: hidden;
-            border: 1px solid #333;
+            border: 1px solid #2a2a2a;
         }
 
         header {
-            /* Header 漸層改為較深邃的紫色 */
-            background: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
-            color: white;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d1b3d 100%);
+            color: #e0e0e0;
             padding: 40px;
             text-align: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 2px solid #3a3a3a;
         }
 
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
             font-weight: 700;
-            letter-spacing: 1px;
+            color: #ffffff;
         }
 
         .subtitle {
             font-size: 1.1em;
             opacity: 0.8;
+            color: #b0b0b0;
         }
 
         .actions {
             padding: 30px 40px;
-            background: #252525;
-            border-bottom: 2px solid #333;
+            background: #151515;
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .filter-group {
@@ -65,19 +71,25 @@
             flex-wrap: wrap;
         }
 
+        .filter-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
         .filter-box label {
             font-size: 13px;
-            color: #aaa;
+            color: #888;
             font-weight: 600;
         }
 
         .filter-box select {
             padding: 10px 15px;
-            background: #333;
-            border: 2px solid #444;
+            border: 2px solid #333;
             border-radius: 10px;
             font-size: 15px;
-            color: #fff;
+            background: #2a2a2a;
+            color: #e0e0e0;
             cursor: pointer;
             transition: all 0.3s;
             min-width: 120px;
@@ -85,14 +97,19 @@
 
         .filter-box select:focus {
             outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.2);
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+
+        .filter-box select option {
+            background: #2a2a2a;
+            color: #e0e0e0;
         }
 
         .reset-btn {
             padding: 10px 20px;
-            background: #444;
-            color: #ccc;
+            background: #333;
+            color: #e0e0e0;
             border: none;
             border-radius: 10px;
             font-size: 14px;
@@ -103,84 +120,112 @@
         }
 
         .reset-btn:hover {
-            background: #555;
-            color: #fff;
+            background: #444;
+            transform: translateY(-1px);
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
         }
 
         .search-box input {
             width: 100%;
             padding: 12px 20px;
-            background: #333;
-            border: 2px solid #444;
+            border: 2px solid #333;
             border-radius: 10px;
             font-size: 16px;
-            color: #fff;
             transition: all 0.3s;
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        .search-box input::placeholder {
+            color: #666;
         }
 
         .search-box input:focus {
             outline: none;
-            border-color: #764ba2;
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
         }
 
         .add-event-btn {
-            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            border: 1px solid #555;
+            background: linear-gradient(135deg, #4a6fa5 0%, #6a4a7a 100%);
+            color: #ffffff;
+            border: none;
             padding: 12px 30px;
             border-radius: 10px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             text-decoration: none;
             display: inline-block;
         }
 
         .add-event-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            filter: brightness(1.2);
+            box-shadow: 0 10px 20px rgba(74, 111, 165, 0.4);
         }
 
-        /* 統計欄位改為深色帶點金屬感 */
         .stats {
             padding: 20px 40px;
             background: #1e1e1e;
-            border-bottom: 2px solid #333;
+            border-bottom: 2px solid #2a2a2a;
             display: flex;
             gap: 30px;
             flex-wrap: wrap;
         }
 
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .stat-number {
             font-size: 24px;
             font-weight: 700;
-            color: #bb86fc; /* 淺紫色，深色模式的經典強調色 */
+            color: #4a6fa5;
         }
 
         .stat-label {
-            color: #999;
+            color: #888;
             font-size: 14px;
         }
 
         .table-container {
             padding: 40px;
-            background: #1a1a1a;
             overflow-x: auto;
         }
 
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
         thead {
-            background: #333;
-            color: #bb86fc;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d1b3d 100%);
+            color: #e0e0e0;
         }
 
         th {
             padding: 15px 20px;
             text-align: left;
             font-weight: 600;
-            font-size: 13px;
-            border-bottom: 2px solid #444;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
         }
 
         tbody tr {
@@ -191,43 +236,103 @@
 
         tbody tr:hover {
             background: #252525;
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
 
         td {
             padding: 20px;
             font-size: 15px;
-            color: #ccc;
+            color: #d0d0d0;
         }
 
         .date-cell {
             font-weight: 600;
-            color: #bb86fc;
+            color: #4a6fa5;
             white-space: nowrap;
+            min-width: 120px;
         }
 
         .event-cell {
             line-height: 1.6;
-            color: #ddd;
+            color: #e0e0e0;
+        }
+
+        .source-cell {
+            font-size: 13px;
+            color: #888;
         }
 
         .source-link {
-            color: #03dac6; /* 湖水綠，深色模式中醒目的連結色 */
+            color: #6a8fc5;
             text-decoration: none;
             font-weight: 500;
         }
 
         .source-link:hover {
             text-decoration: underline;
-            filter: brightness(1.2);
+            color: #8aa9d5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #666;
         }
 
         footer {
-            background: #111;
+            background: #151515;
             padding: 30px 40px;
             text-align: center;
             color: #666;
-            border-top: 1px solid #333;
+            font-size: 14px;
+            border-top: 2px solid #2a2a2a;
         }
+
+        footer a {
+            color: #6a8fc5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #3a1f1f;
+            color: #ff6b6b;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 40px;
+            border: 1px solid #5a2f2f;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -270,8 +375,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🇹🇼 無立場台灣政治事件紀錄</h1>
-            <p class="subtitle">拒絕集體健忘！<br>我就好奇！他們這些領我薪水的人，每天在幹嘛！？</p>
+            <h1>🇹🇼 台灣政治事件紀錄</h1>
+            <p class="subtitle">追蹤記錄台灣重要政治事件</p>
         </header>
 
         <div class="actions">
@@ -330,6 +435,8 @@
             </div>
         </div>
 
+        <div id="errorContainer"></div>
+
         <div class="table-container">
             <div id="loading" class="loading">⏳ 載入中...</div>
             
@@ -367,23 +474,64 @@
         let allEvents = [];
         let filteredEvents = [];
 
+        // 顯示錯誤訊息
+        function showError(message, details) {
+            const errorContainer = document.getElementById('errorContainer');
+            errorContainer.innerHTML = `
+                <div class="error-message">
+                    <strong>⚠️ ${message}</strong>
+                    ${details ? `<div style="margin-top: 10px; font-size: 13px; opacity: 0.8;">${details}</div>` : ''}
+                </div>
+            `;
+        }
+
         // 載入事件
         async function loadEvents() {
             try {
-                const response = await fetch(`${API_URL}?state=open&labels=event&per_page=100`);
+                console.log('開始載入事件...');
+                console.log('API URL:', `${API_URL}?state=all&labels=event&per_page=100`);
+                
+                const response = await fetch(`${API_URL}?state=all&labels=event&per_page=100`);
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const issues = await response.json();
+                console.log('載入的 Issues 數量:', issues.length);
+                console.log('Issues 資料:', issues);
 
-                allEvents = issues
+                // 只保留 open 的 issues
+                const openIssues = issues.filter(issue => issue.state === 'open');
+                console.log('Open Issues 數量:', openIssues.length);
+
+                allEvents = openIssues
                     .map(issue => parseEvent(issue))
                     .filter(event => event !== null)
                     .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                console.log('解析後的事件數量:', allEvents.length);
+                console.log('事件資料:', allEvents);
+
+                if (allEvents.length === 0 && issues.length > 0) {
+                    showError(
+                        '無法解析事件資料',
+                        '請確認 Issue 格式是否正確。範例格式：<br>日期：2026 年 5 月<br>事件：事件描述<br>來源：（選填）'
+                    );
+                }
 
                 populateYearFilter();
                 applyFilters();
                 updateStats();
             } catch (error) {
                 console.error('載入事件失敗:', error);
-                document.getElementById('loading').innerHTML = '❌ 載入失敗，請重新整理頁面';
+                document.getElementById('loading').innerHTML = '';
+                showError(
+                    '載入失敗',
+                    `錯誤訊息：${error.message}<br><br>可能原因：<br>1. 網路連線問題<br>2. GitHub API 速率限制<br>3. Repository 設定問題<br><br>請稍後再試或檢查 Issues 是否有 "event" 標籤`
+                );
             }
         }
 
@@ -391,21 +539,36 @@
         function parseEvent(issue) {
             try {
                 const body = issue.body || '';
+                console.log('解析 Issue:', issue.title);
+                console.log('Issue body:', body);
                 
                 // 支援多種日期格式
-                const dateMatch = body.match(/日期[：:]\s*(\d{4})\s*年?\s*(\d{1,2})\s*月?\s*(\d{1,2})?\s*日?/) ||
-                                body.match(/年份[：:]\s*(\d{4})[\s\S]*?月份[：:]\s*(\d{1,2})/);
+                let dateMatch = body.match(/日期[：:]\s*(\d{4})\s*年?\s*(\d{1,2})\s*月?\s*(\d{1,2})?\s*日?/);
+                
+                if (!dateMatch) {
+                    // 嘗試另一種格式：年份：2026 月份：5
+                    const yearMatch = body.match(/年份[：:]\s*(\d{4})/);
+                    const monthMatch = body.match(/月份[：:]\s*(\d{1,2})/);
+                    const dayMatch = body.match(/日期[：:]\s*(\d{1,2})/);
+                    
+                    if (yearMatch && monthMatch) {
+                        dateMatch = [null, yearMatch[1], monthMatch[1], dayMatch ? dayMatch[1] : null];
+                    }
+                }
                 
                 const eventMatch = body.match(/事件[：:]\s*(.+?)(?:\n|$)/);
                 const sourceMatch = body.match(/來源[：:]\s*(.+?)(?:\n|$)/);
 
-                if (!dateMatch || !eventMatch) return null;
+                if (!dateMatch || !eventMatch) {
+                    console.log('無法解析事件，缺少必要欄位');
+                    return null;
+                }
 
                 const year = dateMatch[1];
                 const month = dateMatch[2].padStart(2, '0');
                 const day = dateMatch[3] ? dateMatch[3].padStart(2, '0') : '01';
 
-                return {
+                const event = {
                     date: `${year}-${month}-${day}`,
                     year: year,
                     month: month,
@@ -414,8 +577,11 @@
                     source: sourceMatch ? sourceMatch[1].trim() : '',
                     issueUrl: issue.html_url
                 };
+                
+                console.log('成功解析事件:', event);
+                return event;
             } catch (error) {
-                console.error('解析事件失敗:', error);
+                console.error('解析事件失敗:', error, issue);
                 return null;
             }
         }
@@ -474,8 +640,8 @@
 
             tbody.innerHTML = events.map(event => {
                 const dateStr = event.day && event.day !== '01' ? 
-                    `${event.year} 年 ${event.month} 月 ${event.day} 日` : 
-                    `${event.year} 年 ${event.month} 月`;
+                    `${event.year} 年 ${parseInt(event.month)} 月 ${parseInt(event.day)} 日` : 
+                    `${event.year} 年 ${parseInt(event.month)} 月`;
                 
                 return `
                     <tr>
